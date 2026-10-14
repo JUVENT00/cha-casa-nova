@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nosso Chá de Casa Nova</title>
+<style>
+:root{--bg:#f7f6f2;--card:#fff;--line:#e6e4dc;--ink:#2d3b33;--mut:#8a8f87;--green:#3f5c4a;--sage:#8aa08c;--ok:#3f8a5c;--no:#b5534f;--gold:#a8823a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding:20px 16px 80px}
+.wrap{max-width:720px;margin:0 auto}
+.brand{font-family:Georgia,serif;font-size:1.5rem;color:var(--green);margin-bottom:18px}
+.eyebrow{font-size:.7rem;letter-spacing:3px;text-transform:uppercase;color:var(--sage);margin-bottom:6px}
+h1{font-family:Georgia,serif;font-weight:400;font-size:clamp(1.8rem,6vw,2.4rem);margin-bottom:18px}
+h2{font-family:Georgia,serif;font-weight:400;font-size:1.4rem;margin-bottom:6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:16px}
+.c{text-align:center}
+.muted{color:var(--mut);font-size:.9rem}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{background:var(--green);color:#fff;border:0;border-radius:12px;padding:12px 18px;font-weight:600;cursor:pointer;font-size:.95rem;text-decoration:none;display:inline-block}
+.btn.ghost{background:transparent;color:var(--green);border:1px solid var(--line)}
+.btn.wa{background:#25d366}
+.btn.danger{background:transparent;color:var(--no);border:1px solid var(--no)}
+.btn.sm{padding:7px 12px;font-size:.8rem}
+.btn.full{width:100%}
+label{display:block;font-size:.85rem;color:var(--green);font-weight:600;margin:12px 0 6px}
+input,select,textarea{width:100%;background:#fff;border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px;font-size:1rem;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--sage)}
+textarea{min-height:80px;resize:vertical}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:22px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:6px}
+.tab{flex:1;min-width:100px;padding:10px;border:0;background:transparent;border-radius:12px;color:var(--mut);cursor:pointer;font-size:.9rem;font-family:inherit}
+.tab.on{background:#e9efe9;color:var(--green);font-weight:600}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center}
+.stat b{display:block;font-size:1.5rem;color:var(--green)}
+.stat span{font-size:.65rem;color:var(--mut);text-transform:uppercase;letter-spacing:1px}
+.item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.item:last-child{border:0}
+.tag{display:inline-block;font-size:.72rem;padding:3px 10px;border-radius:99px;border:1px solid var(--line);color:var(--mut);margin-top:4px}
+.tag.vai{color:var(--ok);border-color:var(--ok)}
+.tag.nao_vai{color:var(--no);border-color:var(--no)}
+.tag.pendente{color:var(--gold);border-color:var(--gold)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+.gift{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;cursor:pointer;transition:.2s}
+.gift:hover{border-color:var(--sage);transform:translateY(-2px)}
+.gift.off{opacity:.45;cursor:not-allowed}
+.gift img,.gift .ph{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;background:#f0f0ec}
+.gift .ph{display:flex;align-items:center;justify-content:center;font-size:2.5rem}
+.gift .b{padding:12px}
+.gift h3{font-size:.95rem;margin-bottom:4px;font-weight:600}
+.pr{color:var(--mut);font-size:.8rem}
+.big{width:180px;height:180px;object-fit:cover;border-radius:16px;margin:10px 0}
+.thumb{width:52px;height:52px;border-radius:12px;object-fit:cover}
+.bar{height:8px;background:#eef0ea;border-radius:99px;overflow:hidden;margin:12px 0}
+.bar span{display:block;height:100%;background:var(--sage)}
+.msg{background:#fbfaf5;border:1px dashed var(--sage);border-radius:12px;padding:12px;font-size:.92rem;margin-top:8px;white-space:pre-wrap}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:10px 18px;border-radius:99px;font-weight:600;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;z-index:9}
+.toast.on{opacity:1}
+.hidden{display:none!important}
+@media(max-width:560px){.stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<main class="wrap" id="app"></main>
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY = 'cha-casa-nova-v1';
+const SENHA = 'ana2026'; // troque aqui
+const DEFAULT = {
+  evento: {
+    titulo: 'Chá de Casa Nova',
+    anfitrioes: 'Rodrigo & Camilly',
+    data: '2026-11-21',
+    hora: '16h às 21h',
+    local: 'Av. Santo Afonso, 1126 • Jardim Miriam',
+    msg: 'Estamos começando uma nova história, e queremos você pertinho da gente para celebrar nosso novo lar! Participe do começo da nossa história!'
+  },
+  convidados: [],
+  presentes: []
+};
+
+let db = JSON.parse(localStorage.getItem(KEY) || 'null') || structuredClone(DEFAULT);
+const save = () => localStorage.setItem(KEY, JSON.stringify(db));
+const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const $ = s => document.querySelector(s);
+const toast = t => { const e = $('#toast'); e.textContent = t; e.classList.add('on'); clearTimeout(e.t); e.t = setTimeout(() => e.classList.remove('on'), 2200); };
+const fmtData = iso => { const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}`; };
+const linkConvite = c => `${location.origin}${location.pathname}?c=${c.token}`;
+
+function lerFoto(file) {
+  if (!file) return Promise.resolve('');
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const s = Math.min(1, 600 / Math.max(img.width, img.height));
+        const cv = document.createElement('canvas');
+        cv.width = img.width * s; cv.height = img.height * s;
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        res(cv.toDataURL('image/jpeg', 0.8));
+      };
+      img.onerror = rej; img.src = r.result;
+    };
+    r.onerror = rej; r.readAsDataURL(file);
+  });
+}
+
+function liberar(c) {
+  const p = db.presentes.find(x => x.id === c.presenteId);
+  if (p) p.escolhidoPor = null;
+  c.presenteId = null;
+}
+
+/* ================= CONVIDADO ================= */
+function telaConvidado(token) {
+  const c = db.convidados.find(x => x.token === token);
+  const ev = db.evento;
+  if (!c) {
+    $('#app').innerHTML = `<div class="card c" style="margin-top:60px"><h1>Convite não encontrado</h1><p class="muted">Confira o link com quem te enviou.</p></div>`;
+    return;
+  }
+  const meu = db.presentes.find(p => p.id === c.presenteId);
+  let corpo = '';
+  if (c.status === 'vai' && meu) {
+    corpo = `<div class="card c"><p class="muted">Seu presente</p>
+      <h2>${esc(meu.nome)}</h2>
+      ${meu.foto ? `<img class="big" src="${meu.foto}">` : ''}
+      <p class="muted">Obrigada por participar! 💚 Se quiser trocar, escolha outro abaixo.</p></div>`;
+  }
+  if (c.status === 'vai') {
+    const livres = db.presentes;
+    corpo += `<p class="muted c" style="margin:10px 0">Escolha um presente. Quem escolhe primeiro leva 😉</p>
+      <div class="grid">${livres.length ? livres.map(p => {
+        const ocupado = p.escolhidoPor && p.escolhidoPor !== c.id;
+        return `<div class="gift ${ocupado ? 'off' : ''}" ${ocupado ? '' : `onclick="escolher('${token}','${p.id}')"`}>
+          ${p.foto ? `<img src="${p.foto}">` : '<div class="ph">🎁</div>'}
+          <div class="b"><h3>${esc(p.nome)}</h3><span class="pr">${esc(p.preco)}</span><br>
+          ${p.escolhidoPor === c.id ? '<span class="tag vai">Seu</span>' : ocupado ? '<span class="tag">Escolhido</span>' : ''}</div>
+        </div>`;}).join('') : '<p class="muted c">A lista ainda está sendo montada 🎁</p>'}</div>`;
+  } else if (c.status === 'nao_vai') {
+    corpo = `<p class="muted c">Que pena 😢 Se mudar de ideia, é só confirmar acima.</p>`;
+  }
+
+  $('#app').innerHTML = `
+    <div class="brand">✳ nosso <b>lar.</b></div>
+    <p class="eyebrow">${esc(ev.titulo)}</p>
+    <h1>Olá, ${esc(c.nome)}!</h1>
+    <div class="card c">
+      <p class="muted">${esc(ev.msg)}</p>
+      <p style="margin-top:14px"><b>${fmtData(ev.data)} · ${esc(ev.hora)}</b></p>
+      <p class="muted">${esc(ev.local)}</p>
+      <p class="muted" style="margin-top:6px">Anfitriões: ${esc(ev.anfitrioes)}</p>
+    </div>
+    <div class="card c">
+      <p>Você vai? 💌</p>
+      <div class="row c" style="justify-content:center;margin-top:12px">
+        <button class="btn ${c.status === 'vai' ? '' : 'ghost'}" onclick="rsvp('${token}','vai')">Vou 🎉</button>
+        <button class="btn ${c.status === 'nao_vai' ? '' : 'ghost'}" onclick="rsvp('${token}','nao_vai')">Não vou</button>
+      </div>
+    </div>
+    ${corpo}`;
+}
+function rsvp(token, status) {
+  const c = db.convidados.find(x => x.token === token); if (!c) return;
+  c.status = status;
+  if (status === 'nao_vai') liberar(c);
+  save(); telaConvidado(token);
+}
+function escolher(token, pid) {
+  const c = db.convidados.find(x => x.token === token);
+  const p = db.presentes.find(x => x.id === pid);
+  if (!c || !p) return;
+  if (c.status !== 'vai') return toast('Confirme sua presença primeiro');
+  if (p.escolhidoPor && p.escolhidoPor !== c.id) return toast('Esse presente já foi escolhido');
+  if (c.presenteId === p.id) return;
+  if (!confirm(`Escolher "${p.nome}"?`)) return;
+  liberar(c);
+  p.escolhidoPor = c.id; c.presenteId = p.id;
+  save(); telaConvidado(token); toast('Presente reservado 🎁');
+}
+
+/* ================= PAINEL ================= */
+let aba = 'geral';
+let filtroPres = 'todos';
+
+function telaLogin() {
+  $('#app').innerHTML = `<div class="card" style="max-width:380px;margin:60px auto">
+    <h1>Painel</h1><p class="muted">Acesso restrito</p>
+    <label>Senha</label><input id="senha" type="password">
+    <button class="btn full" style="margin-top:14px" onclick="entrar()">Entrar</button></div>`;
+  $('#senha').onkeydown = e => { if (e.key === 'Enter') entrar(); };
+}
+function entrar() {
+  if ($('#senha').value === SENHA) { sessionStorage.adm = '1'; painel(); }
+  else toast('Senha errada');
+}
+function sair() { sessionStorage.removeItem('adm'); telaLogin(); }
+
+function painel() {
+  if (sessionStorage.adm !== '1') return telaLogin();
+  const ev = db.evento;
+  const vai = db.convidados.filter(c => c.status === 'vai').length;
+  const nao = db.convidados.filter(c => c.status === 'nao_vai').length;
+  const pend = db.convidados.filter(c => c.status === 'pendente').length;
+  const total = db.convidados.length;
+  const livres = db.presentes.filter(p => !p.escolhidoPor).length;
+  const reservados = db.presentes.length - livres;
+
+  let conteudo = '';
+  if (aba === 'geral') {
+    conteudo = `
+      <div class="stats">
+        <div class="stat"><b>${vai}</b><span>Confirmados</span></div>
+        <div class="stat"><b>${pend}</b><span>Pendentes</span></div>
+        <div class="stat"><b>${nao}</b><span>Não vão</span></div>
+        <div class="stat"><b>${reservados}</b><span>Presentes escolhidos</span></div>
+      </div>
+      <div class="card">
+        <h2>Confirmações</h2>
+        <div class="bar"><span style="width:${total ? (vai / total * 100) : 0}%"></span></div>
+        <p class="muted">${vai} de ${total} confirmados · ${livres} presentes ainda livres</p>
+      </div>
+      <div class="card">
+        <h2>Sobre a celebração</h2>
+        <p>${fmtData(ev.data)} · ${esc(ev.hora)}</p>
+        <p class="muted">${esc(ev.local)}</p>
+        <p class="muted">${esc(ev.anfitrioes)}</p>
+        <button class="btn ghost sm" style="margin-top:10px" onclick="aba='evento';painel()">Editar informações</button>
+      </div>`;
+  }
+  if (aba === 'convidados') {
+    conteudo = `
+      <div class="card">
+        <h2>Criar convite individual</h2>
+        <p class="muted">Cada pessoa recebe um link próprio.</p>
+        <label>Nome do convidado</label><input id="cNome" placeholder="Ex.: Fernanda Almeida">
+        <label>WhatsApp (opcional)</label><input id="cZap" placeholder="Ex.: 11999999999" inputmode="numeric">
+        <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn" onclick="addConvidado()">+ Gerar convite</button></div>
+      </div>
+      <div class="card">
+        <h2>Todos os convidados</h2>
+        <p class="muted" style="margin-bottom:8px">${vai} confirmados · ${pend} aguardando · ${nao} não vão</p>
+        ${db.convidados.length ? db.convidados.map(c => {
+          const p = db.presentes.find(x => x.id === c.presenteId);
+          const tag = { vai:'Confirmado', nao_vai:'Não vai', pendente:'Pendente' }[c.status];
+          const link = linkConvite(c);
+          const msgZap = `${db.evento.titulo}\n\nOlá, ${c.nome}! ${db.evento.msg}\n\n${fmtData(db.evento.data)} · ${db.evento.hora}\n${db.evento.local}\n\nConfirme sua presença e escolha um presente: ${link}`;
+          const waBtn = c.zap ? `<a class="btn wa sm" target="_blank" href="https://wa.me/55${c.zap}?text=${encodeURIComponent(msgZap)}">Enviar no WhatsApp</a>` : '';
+          return `<div class="item"><div><b>${esc(c.nome)}</b> <span class="tag ${c.status}">${tag}</span>
+            <div class="muted">${p ? '🎁 ' + esc(p.nome) : 'Sem presente escolhido'}</div></div>
+            <div class="row">${waBtn}<button class="btn ghost sm" onclick="copiar('${link}')">Copiar link</button>
+            <button class="btn danger sm" onclick="delConvidado('${c.id}')">✕</button></div></div>`;
+        }).join('') : '<p class="muted">Nenhum convite ainda.</p>'}
+      </div>`;
+  }
+  if (aba === 'presentes') {
+    const lista = db.presentes.filter(p => filtroPres === 'todos' ? true
+      : filtroPres === 'livres' ? !p.escolhidoPor : !!p.escolhidoPor);
+    conteudo = `
+      <div class="stats">
+        <div class="stat"><b>${livres}</b><span>Disponíveis</span></div>
+        <div class="stat"><b>${reservados}</b><span>Reservados</span></div>
+      </div>
+      <div class="card">
+        <h2>Adicionar presente</h2>
+        <p class="muted">Cadastre itens sem taxa.</p>
+        <label>Nome do presente</label><input id="pNome" placeholder="Ex.: Jogo de panelas">
+        <label>Preço (opcional)</label><input id="pPreco" placeholder="Ex.: R$ 199">
+        <label>Foto (opcional)</label><input id="pFoto" type="file" accept="image/*">
+        <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn" onclick="addPresente()">+ Adicionar presente</button></div>
+      </div>
+      <div class="card">
+        <h2>Gerenciar presentes</h2>
+        <div class="row" style="margin:10px 0">
+          ${['todos','livres','reservados'].map(f => `<button class="btn ${filtroPres===f?'':'ghost'} sm" onclick="filtroPres='${f}';painel()">${f[0].toUpperCase()+f.slice(1)}</button>`).join('')}
+        </div>
+        ${lista.length ? lista.map(p => {
+          const c = db.convidados.find(x => x.id === p.escolhidoPor);
+          return `<div class="item"><div class="row">
+            ${p.foto ? `<img class="thumb" src="${p.foto}">` : '<span style="font-size:1.8rem">🎁</span>'}
+            <div><b>${esc(p.nome)}</b><div class="pr">${esc(p.preco)}</div>
+            <div class="muted">${c ? 'Escolhido por ' + esc(c.nome) : 'Livre'}</div></div></div>
+            <div class="row">${c ? `<button class="btn ghost sm" onclick="liberarPres('${p.id}')">Liberar</button>` : ''}
+            <button class="btn danger sm" onclick="delPresente('${p.id}')">✕</button></div></div>`;
+        }).join('') : '<p class="muted">Nenhum presente nesta lista.</p>'}
+      </div>`;
+  }
+  if (aba === 'evento') {
+    conteudo = `
+      <div class="card">
+        <h2>Informações da celebração</h2>
+        <p class="muted">Aparece nos convites.</p>
+        <label>Título do evento</label><input id="eTitulo" value="${esc(ev.titulo)}">
+        <label>Anfitriões</label><input id="eAnf" value="${esc(ev.anfitrioes)}">
+        <label>Data</label><input id="eData" type="date" value="${ev.data}">
+        <label>Horário</label><input id="eHora" value="${esc(ev.hora)}">
+        <label>Local</label><input id="eLocal" value="${esc(ev.local)}">
+        <label>Mensagem do convite</label><textarea id="eMsg">${esc(ev.msg)}</textarea>
+        <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn" onclick="salvarEvento()">Salvar alterações</button></div>
+      </div>`;
+  }
+
+  $('#app').innerHTML = `
+    <div class="brand">✳ nosso <b>lar.</b></div>
+    <p class="eyebrow">${esc(ev.titulo)} · painel</p>
+    <div class="tabs">
+      ${[['geral','Visão geral'],['convidados','Convidados'],['presentes','Presentes'],['evento','Dados do evento']]
+        .map(([k,l]) => `<button class="tab ${aba===k?'on':''}" onclick="aba='${k}';painel()">${l}</button>`).join('')}
+    </div>
+    ${conteudo}
+    <div class="row" style="justify-content:center;margin-top:20px"><button class="btn ghost sm" onclick="sair()">Sair do painel</button></div>`;
+}
+
+function addConvidado() {
+  const nome = $('#cNome').value.trim();
+  if (!nome) return toast('Digite o nome');
+  const zap = $('#cZap').value.replace(/\D/g, '');
+  db.convidados.push({ id: uid(), token: uid() + uid(), nome, zap, status: 'pendente', presenteId: null });
+  save(); painel(); toast('Convite criado ✅');
+}
+function delConvidado(id) {
+  const c = db.convidados.find(x => x.id === id); if (!c) return;
+  if (!confirm(`Excluir o convite de ${c.nome}?`)) return;
+  liberar(c);
+  db.convidados = db.convidados.filter(x => x.id !== id);
+  save(); painel();
+}
+function copiar(txt) {
+  if (navigator.clipboard) navigator.clipboard.writeText(txt).then(() => toast('Link copiado ✅')).catch(() => prompt('Copie:', txt));
+  else prompt('Copie:', txt);
+}
+async function addPresente() {
+  const nome = $('#pNome').value.trim();
+  if (!nome) return toast('Dê um nome ao presente');
+  const foto = await lerFoto($('#pFoto').files[0]).catch(() => '');
+  db.presentes.push({ id: uid(), nome, preco: $('#pPreco').value.trim(), foto, escolhidoPor: null });
+  save(); painel(); toast('Presente adicionado 🎁');
+}
+function liberarPres(id) {
+  const p = db.presentes.find(x => x.id === id); if (!p) return;
+  const c = db.convidados.find(x => x.id === p.escolhidoPor);
+  if (c) c.presenteId = null;
+  p.escolhidoPor = null; save(); painel();
+}
+function delPresente(id) {
+  const p = db.presentes.find(x => x.id === id); if (!p) return;
+  if (!confirm(`Excluir "${p.nome}"?`)) return;
+  const c = db.convidados.find(x => x.id === p.escolhidoPor);
+  if (c) c.presenteId = null;
+  db.presentes = db.presentes.filter(x => x.id !== id);
+  save(); painel();
+}
+function salvarEvento() {
+  db.evento = {
+    titulo: $('#eTitulo').value.trim() || db.evento.titulo,
+    anfitrioes: $('#eAnf').value.trim(),
+    data: $('#eData').value,
+    hora: $('#eHora').value.trim(),
+    local: $('#eLocal').value.trim(),
+    msg: $('#eMsg').value.trim()
+  };
+  save(); toast('Informações salvas ✅'); painel();
+}
+
+/* ================= ROTEAMENTO ================= */
+const token = new URLSearchParams(location.search).get('c');
+if (token) telaConvidado(token);
+else painel();
+</script>
+</body>
+</html>
